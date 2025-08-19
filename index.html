@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Functional Project Coordinator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f0515;
+            --panel-bg: rgba(255, 255, 255, 0.04);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #e0e0e0;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent-color: #ffb3b3;
+            --brand-color: #500000;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --error-color: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top, #0f0515 0%, #1a0a1a 30%, #2d1b2e 70%, #0f0515 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .main-title {
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 600;
+            background: linear-gradient(135deg, #ffffff, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInUp 0.5s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scenario-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .scenario-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            background: rgba(80, 0, 0, 0.3);
+            border-color: var(--accent-color);
+        }
+        .scenario-card h3 { color: var(--accent-color); margin-bottom: 0.5rem; }
+
+        .phase-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(80, 0, 0, 0.2);
+            border-radius: 16px;
+        }
+        .phase-title { font-size: 1.5rem; font-weight: 600; color: #fff; }
+        .phase-description { color: var(--text-muted); }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+        }
+
+        .decision-panel {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .sidebar-section {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+        .sidebar-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .sidebar-content li {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-meter {
+            margin-bottom: 1rem;
+        }
+        .progress-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-muted);
+        }
+        .meter-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            width: 50%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        #coordination-fill { background: #80d8ff; }
+        #alignment-fill { background: #ffb3b3; }
+        #resources-fill { background: #f1c40f; }
+
+        .stakeholder-tensions li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tension-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: background-color 0.5s ease;
+        }
+
+        .choice-option {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        .choice-option:hover {
+            border-color: var(--accent-color);
+            background: rgba(80, 0, 0, 0.3);
+        }
+        .choice-option.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .choice-tag {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .tag-coordinate { background: #80d8ff; color: #002c50; }
+        .tag-communicate { background: #ffb3b3; color: #500000; }
+        .tag-collaborate { background: #f1c40f; color: #5c4100; }
+
+        .btn {
+            padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer;
+            font-weight: 600; font-size: 14px; transition: all 0.3s ease;
+            width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60); color: white;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .results-panel { display: none; }
+        .results-panel.show { display: block; }
+        
+        .feedback-section { background: rgba(255, 255, 255, 0.04); border-radius: 14px; padding: 20px; text-align: center; }
+        .feedback-title { font-size: 1.5rem; font-weight: 600; color: var(--accent-color); margin-bottom: 12px; }
+        .final-score { font-size: 3rem; font-weight: 700; color: var(--success-color); margin-bottom: 1rem; }
+        .next-step-section { text-align: center; margin-top: 30px; }
+        
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            transform: translateY(-50%);
+        }
+        .milestone {
+            position: relative;
+            text-align: center;
+        }
+        .milestone-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--border-color);
+            border: 3px solid var(--bg-dark);
+            margin: 0 auto 0.5rem auto;
+            transition: all 0.5s ease;
+        }
+        .milestone.active .milestone-dot {
+            background: var(--accent-color);
+            transform: scale(1.2);
+        }
+        .milestone-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .choice-feedback {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s;
+        }
+        .feedback-item { margin-bottom: 1rem; }
+        .feedback-item:last-child { margin-bottom: 0; }
+        .feedback-item h5 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .feedback-item p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .optimal-choice h5 { color: var(--success-color); }
+        .your-choice h5 { color: var(--error-color); }
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .sidebar { order: -1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header-section">
+            <h1 class="main-title">Cross-Functional Project Coordinator</h1>
+            <p class="main-subtitle">Using the Three C's to Lead Without Authority</p>
+        </header>
+
+        <div id="main-view">
+            <div id="intro" class="tab-content active">
+                <h2 style="color: #ffb3b3; margin-bottom: 10px; text-align: center;">Welcome!</h2>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">Select a scenario to practice your cross-functional leadership skills.</p>
+                <div class="scenario-selection-grid"></div>
+            </div>
+
+            <div id="scenario" class="tab-content">
+                <!-- Scenario content will be injected here -->
+            </div>
+
+            <div id="results" class="tab-content results-panel">
+                <div class="phase-header" style="text-align:center;">
+                    <h2 class="phase-title">Project Debrief</h2>
+                </div>
+                <div class="feedback-section">
+                    <h3 class="feedback-title" id="final-title">Great Effort!</h3>
+                    <p>Your final project effectiveness score is:</p>
+                    <div class="final-score" id="final-score-value">--</div>
+                    <div id="final-feedback" style="text-align: left;"></div>
+                </div>
+                <div class="next-step-section">
+                    <button class="btn btn-secondary" id="backToMenuBtn">Back to Scenarios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scenarioContainer = document.getElementById('scenario');
+            const introContainer = document.getElementById('intro');
+            const resultsContainer = document.getElementById('results');
+
+            let scores;
+            let currentScenario;
+            let currentPhaseIndex;
+
+            const scenarios = [
+                {
+                    title: "Multi-Department Training Initiative",
+                    stakeholders: [
+                        { name: "Operations", tension: 50 },
+                        { name: "HR", tension: 50 },
+                        { name: "Finance", tension: 50 },
+                        { name: "Safety", tension: 50 }
+                    ],
+                    phases: [
+                        {
+                            milestone: "Kickoff",
+                            challenge: "You need to kick off the project and get initial buy-in from all departments.",
+                            choices: [
+                                { type: "Communicate", text: "Send a detailed email to all department heads outlining the project goals and timeline.", effects: { coordination: 5, alignment: 10, resources: 0, tensions: { Operations: 0, HR: 0, Finance: -5, Safety: 0 } }, rationale: "While fast, this one-way communication can feel like a directive and doesn't build buy-in, leading to passive resistance." },
+                                { type: "Coordinate", text: "Schedule individual meetings with each department head to understand their constraints and priorities first.", effects: { coordination: 15, alignment: 5, resources: 5, tensions: { Operations: 5, HR: 5, Finance: 5, Safety: 5 } }, rationale: "A good step for gathering information, but it keeps stakeholders separate, making it harder to find common ground later." },
+                                { type: "Collaborate", text: "Host a joint kick-off workshop to co-create the project charter and define shared success metrics.", effects: { coordination: 10, alignment: 20, resources: 10, tensions: { Operations: 10, HR: 10, Finance: 10, Safety: 10 } }, isOptimal: true, rationale: "This is the best choice because it builds shared ownership from the start, reducing future resistance and aligning everyone on a common goal." }
+                            ]
+                        },
+                        {
+                            milestone: "Mid-Project Check-in",
+                            challenge: "Finance has raised concerns about the budget, while Operations is worried about staff time away from work. Tensions are rising.",
+                            choices: [
+                                { type: "Communicate", text: "Reassure both departments via email that their concerns are noted and will be addressed later.", effects: { coordination: 0, alignment: -10, resources: -5, tensions: { Operations: -10, HR: 0, Finance: -10, Safety: 0 } }, rationale: "This approach can feel dismissive and may increase frustration, as it doesn't actively solve the problem." },
+                                { type: "Coordinate", text: "Ask Finance and Operations to submit formal reports detailing their concerns and proposed solutions.", effects: { coordination: 10, alignment: 0, resources: 5, tensions: { Operations: 0, HR: 0, Finance: 0, Safety: 0 } }, rationale: "This creates more work for already stressed stakeholders and doesn't foster a joint solution." },
+                                { type: "Collaborate", text: "Facilitate a meeting between Finance and Operations to find a win-win, like a phased training rollout that spreads out costs and time commitment.", effects: { coordination: 5, alignment: 20, resources: 15, tensions: { Operations: 15, HR: 0, Finance: 15, Safety: 0 } }, isOptimal: true, rationale: "This is optimal because it directly addresses the conflict by bringing the parties together to find a mutually acceptable solution." }
+                            ]
+                        },
+                        {
+                            milestone: "Final Approval",
+                            challenge: "The plan is almost ready, but Safety is insisting on an extra compliance step that will add two weeks to the timeline.",
+                            choices: [
+                                { type: "Communicate", text: "Inform leadership that Safety is causing a delay and ask for their intervention.", effects: { coordination: -5, alignment: -15, resources: 0, tensions: { Safety: -20 } }, rationale: "This escalates the issue and positions Safety as an obstacle, damaging relationships and undermining your authority." },
+                                { type: "Coordinate", text: "Accept the delay and update the project timeline, informing all stakeholders of the new launch date.", effects: { coordination: 10, alignment: 5, resources: -5, tensions: { Safety: 10 } }, rationale: "This is a passive approach that accepts a setback without exploring better options, potentially frustrating other stakeholders." },
+                                { type: "Collaborate", text: "Work with Safety and HR to find a way to meet the compliance need in parallel with other tasks, preserving the timeline.", effects: { coordination: 15, alignment: 15, resources: 10, tensions: { Safety: 15, HR: 5 } }, isOptimal: true, rationale: "This is the best choice as it treats the new requirement as a problem to be solved collaboratively, respecting Safety's needs while still aiming for the project's goals." }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title: "Technology Implementation",
+                    situation: "Rolling out a new software system affecting multiple departments with different technical readiness.",
+                    stakeholders: [
+                        { name: "IT", tension: 50 },
+                        { name: "Sales", tension: 50 },
+                        { name: "Finance", tension: 50 },
+                        { name: "Training", tension: 50 }
+                    ],
+                    phases: [
+                        {
+                            milestone: "Planning",
+                            challenge: "IT wants a standardized rollout for efficiency, but Sales is demanding custom features critical for their workflow.",
+                            choices: [
+                                { type: "Coordinate", text: "Tell Sales to submit a formal change request to IT's governance committee.", effects: { coordination: 10, alignment: -5, resources: 0, tensions: { IT: 5, Sales: -10 } }, rationale: "This follows process but can feel bureaucratic and slow, frustrating the Sales team and delaying resolution." },
+                                { type: "Communicate", text: "Explain to Sales that standardization is non-negotiable per executive order.", effects: { coordination: 5, alignment: -15, resources: -5, tensions: { IT: 10, Sales: -20 } }, rationale: "Using authority damages your relationship with Sales and ignores their potentially valid business needs." },
+                                { type: "Collaborate", text: "Broker a workshop with IT and Sales to identify a 'minimum viable customization' that meets critical needs without derailing the timeline.", effects: { coordination: 5, alignment: 20, resources: 5, tensions: { IT: 10, Sales: 15 } }, isOptimal: true, rationale: "This is the optimal choice because it seeks a win-win solution that respects both IT's need for efficiency and Sales' need for functionality." }
+                            ]
+                        },
+                        {
+                            milestone: "Pre-Launch",
+                            challenge: "The rollout is approved, but the Training department says they need more time to prepare materials, which will delay the launch.",
+                            choices: [
+                                { type: "Coordinate", text: "Adjust the project plan, pushing back the launch date to accommodate Training's request.", effects: { coordination: 15, alignment: 5, resources: -5, tensions: { IT: -5, Sales: -5, Finance: -5, Training: 15 } }, rationale: "While this respects Training's needs, it creates a setback for all other stakeholders without exploring alternative solutions." },
+                                { type: "Communicate", text: "Inform leadership about the delay and the reason, asking for their direction.", effects: { coordination: 0, alignment: 0, resources: 0, tensions: { Training: 5 } }, rationale: "This passes the problem upward instead of solving it. It shows a lack of ownership over the project's success." },
+                                { type: "Collaborate", text: "Build a coalition of early adopters from various departments to help the Training team create and test materials more quickly.", effects: { coordination: 10, alignment: 15, resources: 10, tensions: { IT: 5, Sales: 5, Training: 10 } }, isOptimal: true, rationale: "This is the best approach. It's a creative, collaborative solution that solves the problem by leveraging the resources of the entire group." }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title: "Emergency Exercise Planning",
+                    situation: "Planning a multi-agency exercise requiring coordination with external partners.",
+                    stakeholders: [
+                        { name: "Partner Agencies", tension: 50 },
+                        { name: "Leadership", tension: 50 },
+                        { name: "Media", tension: 50 }
+                    ],
+                    phases: [
+                        {
+                            milestone: "Objective Alignment",
+                            challenge: "Different agencies have different exercise objectives and priorities.",
+                            choices: [
+                                { type: "Communicate", text: "Send a memo with your agency's primary objectives and ask for their input via email.", effects: { coordination: 5, alignment: -10, resources: 0, tensions: { "Partner Agencies": -10, Leadership: -5 } }, rationale: "This one-way approach can make partners feel dictated to, rather than included, leading to low buy-in." },
+                                { type: "Coordinate", text: "Schedule one-on-one calls with each agency to understand their objectives before a group meeting.", effects: { coordination: 15, alignment: 5, resources: 5, tensions: { "Partner Agencies": 5, Leadership: 5 } }, rationale: "A good step, but it doesn't create a shared sense of ownership among the group as a whole." },
+                                { type: "Collaborate", text: "Host a collaborative workshop for all agencies to co-develop a set of shared exercise objectives.", effects: { coordination: 10, alignment: 20, resources: 10, tensions: { "Partner Agencies": 15, Leadership: 10 } }, isOptimal: true, rationale: "This is the best choice because creating shared goals together is the foundation of successful multi-agency collaboration." }
+                            ]
+                        }
+                    ]
+                }
+            ];
+            
+            function renderScenario(scenarioId) {
+                currentScenario = scenarios[scenarioId];
+                currentScenario.stakeholders = JSON.parse(JSON.stringify(scenarios[scenarioId].stakeholders));
+                currentPhaseIndex = 0;
+                scores = { coordination: 50, alignment: 50, resources: 50 };
+                
+                let stakeholderListHTML = '<ul>';
+                currentScenario.stakeholders.forEach(s => {
+                    stakeholderListHTML += `<li><span>${s.name}</span><div class="tension-dot" data-name="${s.name}"></div></li>`;
+                });
+                stakeholderListHTML += '</ul>';
+
+                let timelineHTML = '';
+                currentScenario.phases.forEach((phase, index) => {
+                    timelineHTML += `<div class="milestone" data-index="${index}"><div class="milestone-dot"></div><div class="milestone-label">${phase.milestone}</div></div>`;
+                });
+
+                scenarioContainer.innerHTML = `
+                    <div class="phase-header">
+                        <h3 class="phase-title">${currentScenario.title}</h3>
+                    </div>
+                    <div class="main-layout">
+                        <div class="decision-panel" id="decision-panel"></div>
+                        <aside class="sidebar">
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">Project Timeline</h3>
+                                <div class="timeline">${timelineHTML}</div>
+                            </div>
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">Project Health</h3>
+                                <div class="progress-meter">
+                                    <div class="progress-label">Coordination</div>
+                                    <div class="meter-bar"><div id="coordination-fill" class="meter-fill"></div></div>
+                                </div>
+                                <div class="progress-meter">
+                                    <div class="progress-label">Stakeholder Alignment</div>
+                                    <div class="meter-bar"><div id="alignment-fill" class="meter-fill"></div></div>
+                                </div>
+                                <div class="progress-meter">
+                                    <div class="progress-label">Resource Optimization</div>
+                                    <div class="meter-bar"><div id="resources-fill" class="meter-fill"></div></div>
+                                </div>
+                            </div>
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">Stakeholder Tensions</h3>
+                                <div class="sidebar-content">${stakeholderListHTML}</div>
+                            </div>
+                        </aside>
+                    </div>
+                `;
+                
+                updateMetrics();
+                renderPhase();
+            }
+
+            function renderPhase() {
+                const phase = currentScenario.phases[currentPhaseIndex];
+                const decisionPanel = document.getElementById('decision-panel');
+                
+                document.querySelectorAll('.milestone').forEach(m => m.classList.remove('active'));
+                document.querySelector(`.milestone[data-index="${currentPhaseIndex}"]`).classList.add('active');
+                
+                let choicesHTML = '';
+                phase.choices.forEach(choice => {
+                    choicesHTML += `
+                        <div class="choice-option" data-type="${choice.type}">
+                            <div class="choice-tag tag-${choice.type.toLowerCase()}">${choice.type}</div>
+                            <p>${choice.text}</p>
+                        </div>
+                    `;
+                });
+
+                decisionPanel.innerHTML = `
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Decision Point: ${phase.challenge}</h3>
+                    ${choicesHTML}
+                    <div id="choice-feedback" class="choice-feedback" style="display:none;"></div>
+                `;
+
+                document.querySelectorAll('.choice-option').forEach(btn => {
+                    btn.addEventListener('click', handleChoiceSelection);
+                });
+            }
+
+            function handleChoiceSelection(event) {
+                const selectedChoiceElement = event.currentTarget;
+                const choiceType = selectedChoiceElement.dataset.type;
+                const phase = currentScenario.phases[currentPhaseIndex];
+                const choice = phase.choices.find(c => c.type === choiceType);
+
+                scores.coordination = Math.max(0, Math.min(100, scores.coordination + (choice.effects.coordination || 0)));
+                scores.alignment = Math.max(0, Math.min(100, scores.alignment + (choice.effects.alignment || 0)));
+                scores.resources = Math.max(0, Math.min(100, scores.resources + (choice.effects.resources || 0)));
+                
+                currentScenario.stakeholders.forEach(s => {
+                    if (choice.effects.tensions[s.name]) {
+                        s.tension = Math.max(0, Math.min(100, s.tension + choice.effects.tensions[s.name]));
+                    }
+                });
+
+                updateMetrics();
+                
+                // Visual Feedback Logic
+                document.querySelectorAll('.choice-option').forEach(btn => btn.classList.add('disabled'));
+
+                const optimalChoice = phase.choices.find(c => c.isOptimal);
+                
+                const feedbackBox = document.getElementById('choice-feedback');
+                let feedbackHTML = `<div class="feedback-item optimal-choice"><h5>Optimal Choice: ${optimalChoice.type}</h5><p>${optimalChoice.rationale}</p></div>`;
+
+                if (choice.type !== optimalChoice.type) {
+                    selectedChoiceElement.style.borderColor = 'var(--error-color)';
+                    feedbackHTML += `<div class="feedback-item your-choice"><h5>Your Choice: ${choice.type}</h5><p>${choice.rationale}</p></div>`;
+                } else {
+                    selectedChoiceElement.style.borderColor = 'var(--success-color)';
+                }
+                
+                feedbackBox.innerHTML = feedbackHTML;
+                feedbackBox.style.display = 'block';
+
+
+                setTimeout(() => {
+                    currentPhaseIndex++;
+                    if (currentPhaseIndex < currentScenario.phases.length) {
+                        renderPhase();
+                    } else {
+                        showResults();
+                    }
+                }, 4000);
+            }
+
+            function updateMetrics() {
+                document.getElementById('coordination-fill').style.width = `${scores.coordination}%`;
+                document.getElementById('alignment-fill').style.width = `${scores.alignment}%`;
+                document.getElementById('resources-fill').style.width = `${scores.resources}%`;
+
+                currentScenario.stakeholders.forEach(s => {
+                    const dot = document.querySelector(`.tension-dot[data-name="${s.name}"]`);
+                    if (s.tension > 65) dot.style.backgroundColor = 'var(--success-color)';
+                    else if (s.tension > 35) dot.style.backgroundColor = 'var(--warning-color)';
+                    else dot.style.backgroundColor = 'var(--error-color)';
+                });
+            }
+
+            function showResults() {
+                scenarioContainer.classList.remove('active');
+                resultsContainer.classList.add('active');
+                
+                const finalScore = Math.round((scores.coordination + scores.alignment + scores.resources) / 3);
+                const finalScoreEl = document.getElementById('final-score-value');
+                const finalFeedbackEl = document.getElementById('final-feedback');
+                const finalTitleEl = document.getElementById('final-title');
+
+                finalScoreEl.textContent = `${finalScore} / 100`;
+                
+                if (finalScore >= 80) {
+                    finalTitleEl.textContent = "Excellent!";
+                    finalFeedbackEl.textContent = "You masterfully balanced coordination, communication, and collaboration to navigate complex stakeholder needs and drive the project forward successfully.";
+                    finalScoreEl.style.color = 'var(--success-color)';
+                } else if (finalScore >= 50) {
+                    finalTitleEl.textContent = "Solid Performance!";
+                    finalFeedbackEl.textContent = "You made good progress, but there were key moments where a different approach—perhaps more collaboration instead of just communication—could have improved stakeholder alignment and overall success.";
+                    finalScoreEl.style.color = 'var(--warning-color)';
+                } else {
+                    finalTitleEl.textContent = "Room for Improvement";
+                    finalFeedbackEl.textContent = "This was a challenging scenario. Cross-functional projects often fail when one of the Three C's is neglected. Reflect on which approach you used least and how it might have helped.";
+                    finalScoreEl.style.color = 'var(--error-color)';
+                }
+            }
+
+            function startScenario(scenarioId) {
+                introContainer.classList.remove('active');
+                resultsContainer.classList.remove('active');
+                scenarioContainer.classList.add('active');
+                renderScenario(scenarioId);
+            }
+            
+            function showIntro() {
+                const grid = introContainer.querySelector('.scenario-selection-grid');
+                grid.innerHTML = '';
+                scenarios.forEach((scenario, index) => {
+                    grid.innerHTML += `<div class="scenario-card" data-scenario-id="${index}"><h3>${scenario.title}</h3></div>`;
+                });
+                 document.querySelectorAll('.scenario-card').forEach(card => {
+                    card.addEventListener('click', (e) => startScenario(parseInt(e.currentTarget.dataset.scenarioId)));
+                });
+            }
+
+            document.getElementById('backToMenuBtn').addEventListener('click', () => {
+                 resultsContainer.classList.remove('active');
+                 introContainer.classList.add('active');
+            });
+            
+            showIntro();
+        });
+    </script>
+</body>
+</html>
