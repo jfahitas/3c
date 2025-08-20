@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cross-Functional Project Coordinator</title>
+    <title>Change Facilitation Toolkit</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -154,21 +154,34 @@
             border-radius: 5px;
             transition: width 0.5s ease;
         }
-        #coordination-fill { background: #80d8ff; }
-        #alignment-fill { background: #ffb3b3; }
-        #resources-fill { background: #f1c40f; }
+        #transition-fill { background: var(--success-color); }
+        #resistance-fill { background: var(--error-color); }
+        #adoption-fill { background: #80d8ff; }
 
-        .stakeholder-tensions li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .stakeholder-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        .tension-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            transition: background-color 0.5s ease;
+        .stakeholder-status {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
         }
+        .stakeholder-name { font-weight: 600; margin-bottom: 0.5rem; }
+        .stakeholder-stage {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            display: inline-block;
+            transition: all 0.5s ease;
+        }
+        .stage-ending { background: var(--error-color); color: #fff; }
+        .stage-neutral { background: var(--warning-color); color: #5c4100; }
+        .stage-beginning { background: var(--success-color); color: #fff; }
 
         .choice-option {
             background: var(--panel-bg);
@@ -187,18 +200,6 @@
             opacity: 0.6;
             pointer-events: none;
         }
-
-        .choice-tag {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
-        .tag-coordinate { background: #80d8ff; color: #002c50; }
-        .tag-communicate { background: #ffb3b3; color: #500000; }
-        .tag-collaborate { background: #f1c40f; color: #5c4100; }
 
         .btn {
             padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer;
@@ -221,44 +222,6 @@
         .final-score { font-size: 3rem; font-weight: 700; color: var(--success-color); margin-bottom: 1rem; }
         .next-step-section { text-align: center; margin-top: 30px; }
         
-        .timeline {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--border-color);
-            transform: translateY(-50%);
-        }
-        .milestone {
-            position: relative;
-            text-align: center;
-        }
-        .milestone-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--border-color);
-            border: 3px solid var(--bg-dark);
-            margin: 0 auto 0.5rem auto;
-            transition: all 0.5s ease;
-        }
-        .milestone.active .milestone-dot {
-            background: var(--accent-color);
-            transform: scale(1.2);
-        }
-        .milestone-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
         .choice-feedback {
             margin-top: 1.5rem;
             padding: 1rem;
@@ -289,14 +252,14 @@
 <body>
     <div class="app-container">
         <header class="header-section">
-            <h1 class="main-title">Cross-Functional Project Coordinator</h1>
-            <p class="main-subtitle">Using the Three C's to Lead Without Authority</p>
+            <h1 class="main-title">Change Facilitation Toolkit</h1>
+            <p class="main-subtitle">Guiding Teams Through Transition</p>
         </header>
 
         <div id="main-view">
             <div id="intro" class="tab-content active">
                 <h2 style="color: #ffb3b3; margin-bottom: 10px; text-align: center;">Welcome!</h2>
-                <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">Select a scenario to practice your cross-functional leadership skills.</p>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">Select a scenario to practice your change facilitation skills.</p>
                 <div class="scenario-selection-grid"></div>
             </div>
 
@@ -306,11 +269,11 @@
 
             <div id="results" class="tab-content results-panel">
                 <div class="phase-header" style="text-align:center;">
-                    <h2 class="phase-title">Project Debrief</h2>
+                    <h2 class="phase-title">Change Debrief</h2>
                 </div>
                 <div class="feedback-section">
                     <h3 class="feedback-title" id="final-title">Great Effort!</h3>
-                    <p>Your final project effectiveness score is:</p>
+                    <p>Your final facilitation effectiveness score is:</p>
                     <div class="final-score" id="final-score-value">--</div>
                     <div id="final-feedback" style="text-align: left;"></div>
                 </div>
@@ -332,89 +295,82 @@
 
             const scenarios = [
                 {
-                    title: "Multi-Department Training Initiative",
+                    title: "Technology Change Without IT Authority",
+                    situation: "A new software is being rolled out by IT. Your role is to help your peers adapt without any formal authority over the rollout.",
                     stakeholders: [
-                        { name: "Operations", tension: 50 },
-                        { name: "HR", tension: 50 },
-                        { name: "Finance", tension: 50 },
-                        { name: "Safety", tension: 50 }
+                        { name: "Tech-Fearful Peers", stage: 0 }, // 0: Ending, 1: Neutral, 2: Beginning
+                        { name: "Long-time Employees", stage: 0 },
+                        { name: "Early Adopters", stage: 1 }
                     ],
                     phases: [
                         {
-                            milestone: "Kickoff",
-                            challenge: "You need to kick off the project and get initial buy-in from all departments.",
+                            challenge: "Initial rollout has begun. There is widespread fear and confusion among your peers.",
                             choices: [
-                                { type: "Communicate", text: "Send a detailed email to all department heads outlining the project goals and timeline.", effects: { coordination: 5, alignment: 10, resources: 0, tensions: { Operations: 0, HR: 0, Finance: -5, Safety: 0 } }, rationale: "While fast, this one-way communication can feel like a directive and doesn't build buy-in, leading to passive resistance." },
-                                { type: "Coordinate", text: "Schedule individual meetings with each department head to understand their constraints and priorities first.", effects: { coordination: 15, alignment: 5, resources: 5, tensions: { Operations: 5, HR: 5, Finance: 5, Safety: 5 } }, rationale: "A good step for gathering information, but it keeps stakeholders separate, making it harder to find common ground later." },
-                                { type: "Collaborate", text: "Host a joint kick-off workshop to co-create the project charter and define shared success metrics.", effects: { coordination: 10, alignment: 20, resources: 10, tensions: { Operations: 10, HR: 10, Finance: 10, Safety: 10 } }, isOptimal: true, rationale: "This is the best choice because it builds shared ownership from the start, reducing future resistance and aligning everyone on a common goal." }
+                                { text: "Tell everyone to just read the manual provided by IT.", effects: { resistance: 10, adoption: -10, coalition: -5, stages: {} }, rationale: "This approach is dismissive of their fears and adds to their cognitive load, likely increasing resistance." },
+                                { text: "Facilitate peer-to-peer learning sessions where early adopters can teach the basics.", effects: { resistance: -10, adoption: 15, coalition: 10, stages: { "Early Adopters": 2, "Tech-Fearful Peers": 1 } }, isOptimal: true, rationale: "This is optimal because it builds psychological safety, creates a support network (coalition), and provides practical help." },
+                                { text: "Complain about the new software along with your colleagues to build rapport.", effects: { resistance: 15, adoption: -15, coalition: -10, stages: {} }, rationale: "While it might create temporary rapport, it validates resistance and undermines the entire change effort." }
                             ]
                         },
                         {
-                            milestone: "Mid-Project Check-in",
-                            challenge: "Finance has raised concerns about the budget, while Operations is worried about staff time away from work. Tensions are rising.",
+                            challenge: "Long-time employees are actively resisting, stating the old system was better and refusing to use the new one.",
                             choices: [
-                                { type: "Communicate", text: "Reassure both departments via email that their concerns are noted and will be addressed later.", effects: { coordination: 0, alignment: -10, resources: -5, tensions: { Operations: -10, HR: 0, Finance: -10, Safety: 0 } }, rationale: "This approach can feel dismissive and may increase frustration, as it doesn't actively solve the problem." },
-                                { type: "Coordinate", text: "Ask Finance and Operations to submit formal reports detailing their concerns and proposed solutions.", effects: { coordination: 10, alignment: 0, resources: 5, tensions: { Operations: 0, HR: 0, Finance: 0, Safety: 0 } }, rationale: "This creates more work for already stressed stakeholders and doesn't foster a joint solution." },
-                                { type: "Collaborate", text: "Facilitate a meeting between Finance and Operations to find a win-win, like a phased training rollout that spreads out costs and time commitment.", effects: { coordination: 5, alignment: 20, resources: 15, tensions: { Operations: 15, HR: 0, Finance: 15, Safety: 0 } }, isOptimal: true, rationale: "This is optimal because it directly addresses the conflict by bringing the parties together to find a mutually acceptable solution." }
-                            ]
-                        },
-                        {
-                            milestone: "Final Approval",
-                            challenge: "The plan is almost ready, but Safety is insisting on an extra compliance step that will add two weeks to the timeline.",
-                            choices: [
-                                { type: "Communicate", text: "Inform leadership that Safety is causing a delay and ask for their intervention.", effects: { coordination: -5, alignment: -15, resources: 0, tensions: { Safety: -20 } }, rationale: "This escalates the issue and positions Safety as an obstacle, damaging relationships and undermining your authority." },
-                                { type: "Coordinate", text: "Accept the delay and update the project timeline, informing all stakeholders of the new launch date.", effects: { coordination: 10, alignment: 5, resources: -5, tensions: { Safety: 10 } }, rationale: "This is a passive approach that accepts a setback without exploring better options, potentially frustrating other stakeholders." },
-                                { type: "Collaborate", text: "Work with Safety and HR to find a way to meet the compliance need in parallel with other tasks, preserving the timeline.", effects: { coordination: 15, alignment: 15, resources: 10, tensions: { Safety: 15, HR: 5 } }, isOptimal: true, rationale: "This is the best choice as it treats the new requirement as a problem to be solved collaboratively, respecting Safety's needs while still aiming for the project's goals." }
+                                { text: "Report the resistant employees to their supervisors.", effects: { resistance: 20, adoption: 5, coalition: -15, stages: {} }, rationale: "Using authority escalates the conflict and creates a culture of fear, damaging your ability to influence as a peer." },
+                                { text: "Acknowledge their frustration and collaborate with them to create a 'translation guide' from the old system to the new one.", effects: { resistance: -15, adoption: 10, coalition: 5, stages: { "Long-time Employees": 1 } }, isOptimal: true, rationale: "This is the best choice. It respects their experience, addresses their loss, and gives them a productive role in the transition." },
+                                { text: "Ignore their resistance and focus only on the employees who are willing to change.", effects: { resistance: 10, adoption: -5, coalition: -5, stages: {} }, rationale: "This allows a pocket of resistance to grow and potentially sabotage the change, while also alienating experienced staff." }
                             ]
                         }
                     ]
                 },
                 {
-                    title: "Technology Implementation",
-                    situation: "Rolling out a new software system affecting multiple departments with different technical readiness.",
+                    title: "Process Change Across Departments",
+                    situation: "A new workflow is being implemented that affects your department and two others you work closely with.",
                     stakeholders: [
-                        { name: "IT", tension: 50 },
-                        { name: "Sales", tension: 50 },
-                        { name: "Finance", tension: 50 },
-                        { name: "Training", tension: 50 }
+                        { name: "Your Department", stage: 1 },
+                        { name: "Dept. A (Losing Autonomy)", stage: 0 },
+                        { name: "Dept. B (Unclear Role)", stage: 1 }
                     ],
                     phases: [
                         {
-                            milestone: "Planning",
-                            challenge: "IT wants a standardized rollout for efficiency, but Sales is demanding custom features critical for their workflow.",
+                            challenge: "Department A is angry about losing control over their part of the process.",
                             choices: [
-                                { type: "Coordinate", text: "Tell Sales to submit a formal change request to IT's governance committee.", effects: { coordination: 10, alignment: -5, resources: 0, tensions: { IT: 5, Sales: -10 } }, rationale: "This follows process but can feel bureaucratic and slow, frustrating the Sales team and delaying resolution." },
-                                { type: "Communicate", text: "Explain to Sales that standardization is non-negotiable per executive order.", effects: { coordination: 5, alignment: -15, resources: -5, tensions: { IT: 10, Sales: -20 } }, rationale: "Using authority damages your relationship with Sales and ignores their potentially valid business needs." },
-                                { type: "Collaborate", text: "Broker a workshop with IT and Sales to identify a 'minimum viable customization' that meets critical needs without derailing the timeline.", effects: { coordination: 5, alignment: 20, resources: 5, tensions: { IT: 10, Sales: 15 } }, isOptimal: true, rationale: "This is the optimal choice because it seeks a win-win solution that respects both IT's need for efficiency and Sales' need for functionality." }
+                                { text: "Facilitate a dialogue session to map the new process together and clarify how their expertise is still critical.", effects: { resistance: -15, adoption: 10, coalition: 10, stages: { "Dept. A (Losing Autonomy)": 1 } }, isOptimal: true, rationale: "This is optimal as it addresses their sense of loss directly, respects their expertise, and gives them agency in the new process." },
+                                { text: "Communicate that the change is mandatory and they need to comply.", effects: { resistance: 15, adoption: -10, coalition: -10, stages: {} }, rationale: "This relies on authority you don't have, increasing resistance and damaging cross-departmental relationships." },
+                                { text: "Coordinate a meeting with leadership to enforce the new process on Department A.", effects: { resistance: 20, adoption: -5, coalition: -15, stages: {} }, rationale: "Escalating the issue undermines your role as a facilitator and turns a process problem into a political one." }
                             ]
                         },
                         {
-                            milestone: "Pre-Launch",
-                            challenge: "The rollout is approved, but the Training department says they need more time to prepare materials, which will delay the launch.",
+                            challenge: "Department B is confused about their new responsibilities and is becoming a bottleneck in the workflow.",
                             choices: [
-                                { type: "Coordinate", text: "Adjust the project plan, pushing back the launch date to accommodate Training's request.", effects: { coordination: 15, alignment: 5, resources: -5, tensions: { IT: -5, Sales: -5, Finance: -5, Training: 15 } }, rationale: "While this respects Training's needs, it creates a setback for all other stakeholders without exploring alternative solutions." },
-                                { type: "Communicate", text: "Inform leadership about the delay and the reason, asking for their direction.", effects: { coordination: 0, alignment: 0, resources: 0, tensions: { Training: 5 } }, rationale: "This passes the problem upward instead of solving it. It shows a lack of ownership over the project's success." },
-                                { type: "Collaborate", text: "Build a coalition of early adopters from various departments to help the Training team create and test materials more quickly.", effects: { coordination: 10, alignment: 15, resources: 10, tensions: { IT: 5, Sales: 5, Training: 10 } }, isOptimal: true, rationale: "This is the best approach. It's a creative, collaborative solution that solves the problem by leveraging the resources of the entire group." }
+                                { text: "Send them a detailed email explaining their new role.", effects: { resistance: 5, adoption: 5, coalition: 0, stages: {} }, rationale: "One-way communication is unlikely to resolve the confusion of the Neutral Zone. It lacks the interaction needed for true clarity." },
+                                { text: "Create a cross-departmental 'win' by helping them solve a problem using the new process, demonstrating its value.", effects: { resistance: -10, adoption: 20, coalition: 15, stages: { "Dept. B (Unclear Role)": 2 } }, isOptimal: true, rationale: "This is the best choice. It creates a small win, demonstrates the benefit of the new process, and builds a collaborative relationship." },
+                                { text: "Take over their tasks temporarily to keep the project moving.", effects: { resistance: 0, adoption: -15, coalition: -5, stages: {} }, rationale: "This solves the immediate problem but prevents Department B from learning, creating dependency and resentment." }
                             ]
                         }
                     ]
                 },
                 {
-                    title: "Emergency Exercise Planning",
-                    situation: "Planning a multi-agency exercise requiring coordination with external partners.",
+                    title: "Cultural Shift Toward Innovation",
+                    situation: "Leadership is pushing for a culture of more innovation and risk-taking, but you have no formal authority to enforce it.",
                     stakeholders: [
-                        { name: "Partner Agencies", tension: 50 },
-                        { name: "Leadership", tension: 50 },
-                        { name: "Media", tension: 50 }
+                        { name: "Risk-Averse Peers", stage: 0 },
+                        { name: "Curious Innovators", stage: 1 },
+                        { name: "Middle Management", stage: 1 }
                     ],
                     phases: [
                         {
-                            milestone: "Objective Alignment",
-                            challenge: "Different agencies have different exercise objectives and priorities.",
+                            challenge: "Your peers are comfortable with the status quo and afraid to try new things for fear of failure.",
                             choices: [
-                                { type: "Communicate", text: "Send a memo with your agency's primary objectives and ask for their input via email.", effects: { coordination: 5, alignment: -10, resources: 0, tensions: { "Partner Agencies": -10, Leadership: -5 } }, rationale: "This one-way approach can make partners feel dictated to, rather than included, leading to low buy-in." },
-                                { type: "Coordinate", text: "Schedule one-on-one calls with each agency to understand their objectives before a group meeting.", effects: { coordination: 15, alignment: 5, resources: 5, tensions: { "Partner Agencies": 5, Leadership: 5 } }, rationale: "A good step, but it doesn't create a shared sense of ownership among the group as a whole." },
-                                { type: "Collaborate", text: "Host a collaborative workshop for all agencies to co-develop a set of shared exercise objectives.", effects: { coordination: 10, alignment: 20, resources: 10, tensions: { "Partner Agencies": 15, Leadership: 10 } }, isOptimal: true, rationale: "This is the best choice because creating shared goals together is the foundation of successful multi-agency collaboration." }
+                                { text: "Model safe experimentation by trying a small, low-risk innovation on your own work and sharing the results, whether it succeeds or fails.", effects: { resistance: -10, adoption: 10, coalition: 10, stages: { "Curious Innovators": 2 } }, isOptimal: true, rationale: "This is optimal. It demonstrates the desired behavior, creates psychological safety by sharing failures, and inspires others through action, not words." },
+                                { text: "Forward leadership's emails about innovation to your team with an encouraging note.", effects: { resistance: -5, adoption: 5, coalition: 0, stages: {} }, rationale: "This is a low-impact action that does little to address the underlying fear of failure." },
+                                { text: "Criticize the current lack of innovation in a team meeting to create a sense of urgency.", effects: { resistance: 15, adoption: -10, coalition: -10, stages: {} }, rationale: "This approach creates fear and defensiveness, making people less likely to take the risks required for innovation." }
+                            ]
+                        },
+                        {
+                            challenge: "Middle managers are paying lip service to innovation but still punishing small failures.",
+                            choices: [
+                                { text: "Build a coalition of other innovation champions and collectively present a proposal to leadership for 'safe-to-fail' experiments.", effects: { resistance: -5, adoption: 15, coalition: 20, stages: { "Middle Management": 2 } }, isOptimal: true, rationale: "This is the best choice. It uses influence to address a systemic issue, provides a concrete solution, and protects individuals by acting as a group." },
+                                { text: "Go to your own boss and complain about the mixed messages from middle management.", effects: { resistance: 5, adoption: -5, coalition: -5, stages: {} }, rationale: "This positions you as a complainer rather than a problem-solver and may not lead to any real change." },
+                                { text: "Encourage your team to innovate but warn them to be careful not to fail.", effects: { resistance: 10, adoption: -10, coalition: 0, stages: {} }, rationale: "This sends a conflicting message that reinforces the fear of failure, effectively stifling any real innovation." }
                             ]
                         }
                     ]
@@ -425,17 +381,16 @@
                 currentScenario = scenarios[scenarioId];
                 currentScenario.stakeholders = JSON.parse(JSON.stringify(scenarios[scenarioId].stakeholders));
                 currentPhaseIndex = 0;
-                scores = { coordination: 50, alignment: 50, resources: 50 };
+                scores = { transition: 0, resistance: 50, adoption: 0, coalition: 50 };
                 
-                let stakeholderListHTML = '<ul>';
+                let stakeholderDashboardHTML = '';
                 currentScenario.stakeholders.forEach(s => {
-                    stakeholderListHTML += `<li><span>${s.name}</span><div class="tension-dot" data-name="${s.name}"></div></li>`;
-                });
-                stakeholderListHTML += '</ul>';
-
-                let timelineHTML = '';
-                currentScenario.phases.forEach((phase, index) => {
-                    timelineHTML += `<div class="milestone" data-index="${index}"><div class="milestone-dot"></div><div class="milestone-label">${phase.milestone}</div></div>`;
+                    stakeholderDashboardHTML += `
+                        <div class="stakeholder-status" data-name="${s.name}">
+                            <div class="stakeholder-name">${s.name}</div>
+                            <div class="stakeholder-stage"></div>
+                        </div>
+                    `;
                 });
 
                 scenarioContainer.innerHTML = `
@@ -446,27 +401,23 @@
                         <div class="decision-panel" id="decision-panel"></div>
                         <aside class="sidebar">
                             <div class="sidebar-section">
-                                <h3 class="sidebar-title">Project Timeline</h3>
-                                <div class="timeline">${timelineHTML}</div>
-                            </div>
-                            <div class="sidebar-section">
-                                <h3 class="sidebar-title">Project Health</h3>
+                                <h3 class="sidebar-title">Change Progress</h3>
                                 <div class="progress-meter">
-                                    <div class="progress-label">Coordination</div>
-                                    <div class="meter-bar"><div id="coordination-fill" class="meter-fill"></div></div>
+                                    <div class="progress-label">Overall Transition</div>
+                                    <div class="meter-bar"><div id="transition-fill" class="meter-fill"></div></div>
                                 </div>
                                 <div class="progress-meter">
-                                    <div class="progress-label">Stakeholder Alignment</div>
-                                    <div class="meter-bar"><div id="alignment-fill" class="meter-fill"></div></div>
+                                    <div class="progress-label">Resistance Level</div>
+                                    <div class="meter-bar"><div id="resistance-fill" class="meter-fill"></div></div>
                                 </div>
                                 <div class="progress-meter">
-                                    <div class="progress-label">Resource Optimization</div>
-                                    <div class="meter-bar"><div id="resources-fill" class="meter-fill"></div></div>
+                                    <div class="progress-label">Adoption Rate</div>
+                                    <div class="meter-bar"><div id="adoption-fill" class="meter-fill"></div></div>
                                 </div>
                             </div>
                             <div class="sidebar-section">
-                                <h3 class="sidebar-title">Stakeholder Tensions</h3>
-                                <div class="sidebar-content">${stakeholderListHTML}</div>
+                                <h3 class="sidebar-title">Stakeholder Dashboard</h3>
+                                <div class="stakeholder-dashboard">${stakeholderDashboardHTML}</div>
                             </div>
                         </aside>
                     </div>
@@ -480,87 +431,83 @@
                 const phase = currentScenario.phases[currentPhaseIndex];
                 const decisionPanel = document.getElementById('decision-panel');
                 
-                document.querySelectorAll('.milestone').forEach(m => m.classList.remove('active'));
-                document.querySelector(`.milestone[data-index="${currentPhaseIndex}"]`).classList.add('active');
-                
                 let choicesHTML = '';
-                phase.choices.forEach(choice => {
-                    choicesHTML += `
-                        <div class="choice-option" data-type="${choice.type}">
-                            <div class="choice-tag tag-${choice.type.toLowerCase()}">${choice.type}</div>
-                            <p>${choice.text}</p>
-                        </div>
-                    `;
+                phase.choices.forEach((choice, index) => {
+                    choicesHTML += `<div class="choice-option" data-index="${index}"><p>${choice.text}</p></div>`;
                 });
 
                 decisionPanel.innerHTML = `
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Decision Point: ${phase.challenge}</h3>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Challenge: ${phase.challenge}</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Choose your intervention:</p>
                     ${choicesHTML}
                     <div id="choice-feedback" class="choice-feedback" style="display:none;"></div>
                 `;
 
-                document.querySelectorAll('.choice-option').forEach(btn => {
-                    btn.addEventListener('click', handleChoiceSelection);
+                document.querySelectorAll('.choice-option').forEach((btn, index) => {
+                    btn.addEventListener('click', () => handleChoiceSelection(index));
                 });
             }
 
-            function handleChoiceSelection(event) {
-                const selectedChoiceElement = event.currentTarget;
-                const choiceType = selectedChoiceElement.dataset.type;
+            function handleChoiceSelection(choiceIndex) {
                 const phase = currentScenario.phases[currentPhaseIndex];
-                const choice = phase.choices.find(c => c.type === choiceType);
+                const selectedChoice = phase.choices[choiceIndex];
+                const selectedChoiceElement = document.querySelector(`.choice-option[data-index="${choiceIndex}"]`);
 
-                scores.coordination = Math.max(0, Math.min(100, scores.coordination + (choice.effects.coordination || 0)));
-                scores.alignment = Math.max(0, Math.min(100, scores.alignment + (choice.effects.alignment || 0)));
-                scores.resources = Math.max(0, Math.min(100, scores.resources + (choice.effects.resources || 0)));
+                scores.resistance = Math.max(0, Math.min(100, scores.resistance + (selectedChoice.effects.resistance || 0)));
+                scores.adoption = Math.max(0, Math.min(100, scores.adoption + (selectedChoice.effects.adoption || 0)));
+                scores.coalition = Math.max(0, Math.min(100, scores.coalition + (selectedChoice.effects.coalition || 0)));
                 
-                currentScenario.stakeholders.forEach(s => {
-                    if (choice.effects.tensions[s.name]) {
-                        s.tension = Math.max(0, Math.min(100, s.tension + choice.effects.tensions[s.name]));
+                Object.keys(selectedChoice.effects.stages).forEach(stakeholderName => {
+                    const stakeholder = currentScenario.stakeholders.find(s => s.name === stakeholderName);
+                    if (stakeholder) {
+                        stakeholder.stage = selectedChoice.effects.stages[stakeholderName];
                     }
                 });
 
                 updateMetrics();
                 
-                // Visual Feedback Logic
                 document.querySelectorAll('.choice-option').forEach(btn => btn.classList.add('disabled'));
 
                 const optimalChoice = phase.choices.find(c => c.isOptimal);
                 
                 const feedbackBox = document.getElementById('choice-feedback');
-                let feedbackHTML = `<div class="feedback-item optimal-choice"><h5>Optimal Choice: ${optimalChoice.type}</h5><p>${optimalChoice.rationale}</p></div>`;
+                let feedbackHTML = `<div class="feedback-item optimal-choice"><h5>Optimal Choice:</h5><p>${optimalChoice.rationale}</p></div>`;
 
-                if (choice.type !== optimalChoice.type) {
+                if (!selectedChoice.isOptimal) {
                     selectedChoiceElement.style.borderColor = 'var(--error-color)';
-                    feedbackHTML += `<div class="feedback-item your-choice"><h5>Your Choice: ${choice.type}</h5><p>${choice.rationale}</p></div>`;
-                } else {
-                    selectedChoiceElement.style.borderColor = 'var(--success-color)';
+                    feedbackHTML += `<div class="feedback-item your-choice"><h5>Your Choice:</h5><p>${selectedChoice.rationale}</p></div>`;
                 }
+                document.querySelector(`.choice-option[data-index="${phase.choices.indexOf(optimalChoice)}"]`).style.borderColor = 'var(--success-color)';
                 
+                feedbackHTML += `<button class="btn btn-primary" id="continueBtn" style="margin-top: 1rem;">Continue</button>`;
                 feedbackBox.innerHTML = feedbackHTML;
                 feedbackBox.style.display = 'block';
 
-
-                setTimeout(() => {
+                document.getElementById('continueBtn').addEventListener('click', () => {
                     currentPhaseIndex++;
                     if (currentPhaseIndex < currentScenario.phases.length) {
                         renderPhase();
                     } else {
                         showResults();
                     }
-                }, 4000);
+                });
             }
 
             function updateMetrics() {
-                document.getElementById('coordination-fill').style.width = `${scores.coordination}%`;
-                document.getElementById('alignment-fill').style.width = `${scores.alignment}%`;
-                document.getElementById('resources-fill').style.width = `${scores.resources}%`;
+                const totalStages = currentScenario.stakeholders.length * 2;
+                const currentStageSum = currentScenario.stakeholders.reduce((acc, s) => acc + s.stage, 0);
+                scores.transition = Math.round((currentStageSum / totalStages) * 100);
 
+                document.getElementById('transition-fill').style.width = `${scores.transition}%`;
+                document.getElementById('resistance-fill').style.width = `${scores.resistance}%`;
+                document.getElementById('adoption-fill').style.width = `${scores.adoption}%`;
+
+                const stageMap = ['Ending', 'Neutral', 'Beginning'];
+                const classMap = ['stage-ending', 'stage-neutral', 'stage-beginning'];
                 currentScenario.stakeholders.forEach(s => {
-                    const dot = document.querySelector(`.tension-dot[data-name="${s.name}"]`);
-                    if (s.tension > 65) dot.style.backgroundColor = 'var(--success-color)';
-                    else if (s.tension > 35) dot.style.backgroundColor = 'var(--warning-color)';
-                    else dot.style.backgroundColor = 'var(--error-color)';
+                    const el = document.querySelector(`.stakeholder-status[data-name="${s.name}"] .stakeholder-stage`);
+                    el.textContent = stageMap[s.stage];
+                    el.className = 'stakeholder-stage ' + classMap[s.stage];
                 });
             }
 
@@ -568,7 +515,7 @@
                 scenarioContainer.classList.remove('active');
                 resultsContainer.classList.add('active');
                 
-                const finalScore = Math.round((scores.coordination + scores.alignment + scores.resources) / 3);
+                const finalScore = Math.round((scores.transition + (100 - scores.resistance) + scores.adoption + scores.coalition) / 4);
                 const finalScoreEl = document.getElementById('final-score-value');
                 const finalFeedbackEl = document.getElementById('final-feedback');
                 const finalTitleEl = document.getElementById('final-title');
@@ -577,15 +524,15 @@
                 
                 if (finalScore >= 80) {
                     finalTitleEl.textContent = "Excellent!";
-                    finalFeedbackEl.textContent = "You masterfully balanced coordination, communication, and collaboration to navigate complex stakeholder needs and drive the project forward successfully.";
+                    finalFeedbackEl.innerHTML = "<p>You masterfully guided your stakeholders through the transition, building momentum and ensuring successful adoption of the change.</p>";
                     finalScoreEl.style.color = 'var(--success-color)';
                 } else if (finalScore >= 50) {
                     finalTitleEl.textContent = "Solid Performance!";
-                    finalFeedbackEl.textContent = "You made good progress, but there were key moments where a different approach—perhaps more collaboration instead of just communication—could have improved stakeholder alignment and overall success.";
+                    finalFeedbackEl.innerHTML = "<p>You made good progress in facilitating the change, but some stakeholder groups faced significant resistance or confusion. Focusing on the needs of those in the 'Ending' stage can help smooth future transitions.</p>";
                     finalScoreEl.style.color = 'var(--warning-color)';
                 } else {
                     finalTitleEl.textContent = "Room for Improvement";
-                    finalFeedbackEl.textContent = "This was a challenging scenario. Cross-functional projects often fail when one of the Three C's is neglected. Reflect on which approach you used least and how it might have helped.";
+                    finalFeedbackEl.innerHTML = "<p>This was a challenging change to facilitate. Your interventions created significant resistance and lowered the adoption rate. Remember to meet people where they are in the transition process.</p>";
                     finalScoreEl.style.color = 'var(--error-color)';
                 }
             }
